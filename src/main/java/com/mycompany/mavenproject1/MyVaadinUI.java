@@ -10,6 +10,7 @@ import com.vaadin.server.Page;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -46,16 +47,10 @@ import javax.servlet.annotation.WebServlet;
 public class MyVaadinUI extends UI
 {
 
-    private void addComponent(TextField email) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    private void addComponent(Button loginButton) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+   
 
     
-
+    public static String value;
     @WebServlet(value = "/*", asyncSupported = true)
     @VaadinServletConfiguration(productionMode = false, ui = MyVaadinUI.class, widgetset = "com.mycompany.mavenproject1.AppWidgetSet")
     public static class Servlet extends VaadinServlet {
@@ -66,15 +61,18 @@ public class MyVaadinUI extends UI
         final VerticalLayout layout = new VerticalLayout();
         layout.setMargin(true);
         setContent(layout);
+        if("1".equals(VaadinService.getCurrentRequest().getWrappedSession()
+                        .getAttribute("myValue"))){
         advanced(layout);
+        }
         final TextField email = new TextField("Email address");
         final TextField password = new TextField("PayMate password");
         Button button = new Button("Login");
         
         Button loginButton = new Button("Log In", new Button.ClickListener() {
         public void buttonClick(ClickEvent event) {
-            
-            authenticate(layout,  password.getValue(),email.getValue() );
+           // saveValue(SettingReadingSessionAttributesUI.this, value);
+            authenticate(MyVaadinUI.this,layout,  password.getValue(),email.getValue() );
         }
     });
         
@@ -83,6 +81,12 @@ public class MyVaadinUI extends UI
                 layout.addComponent(new Label("Thank you for clicking"));
             }
         });
+         layout.addComponent(new Button("Reload page", new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                getPage().setLocation(getPage().getLocation());
+            }
+        }));
         //setContent(layout);
        layout.addComponent(email); 
         email.focus();
@@ -102,14 +106,41 @@ public class MyVaadinUI extends UI
     
     }    
     
-     public void authenticate(VerticalLayout layout, String pass , String log) 
+    
+     public void authenticate(MyVaadinUI ui, VerticalLayout layout, String pass , String log) 
     {
-        
-        Label ok = new Label("Jestes zalogowany "+pass+ " " + log);
-      layout.addComponent(ok);
+        //value 
+        if("PASS".equals(pass) && "PASS".equals(log)){
+             ui.value = "1";
+        // Save to VaadinServiceSession
+        ui.getSession().setAttribute("myValue", value);
+        // Save to HttpSession
+        VaadinService.getCurrentRequest().getWrappedSession().setAttribute("myValue", value);
 
+            Label ok = new Label("Jestes zalogowany "+pass+ " " + log);
+            layout.addComponent(ok);
+        }
+        else
+        {
+            Label ok = new Label("Złe hasło lub login  "+pass+ " " + log); 
+             layout.addComponent(ok);
+        }
+        
     }
 
+     
+     
+  /*   private static void showValue(MyVaadinUI ui) {
+        ui.layout.removeAllComponents();
+        ui.layout.addComponent(new Label("Value in UI: " + ui.value));
+        ui.layout.addComponent(new Label(
+                "Value in VaadinServiceSession: "
+                        + ui.getSession().getAttribute("myValue")));
+        ui.layout.addComponent(new Label("Value in HttpSession: "
+                + VaadinService.getCurrentRequest().getWrappedSession()
+                        .getAttribute("myValue")));
+    }*/
+     
   
 
     void advanced(VerticalLayout layout) {
@@ -172,7 +203,10 @@ public class MyVaadinUI extends UI
                                       ((float)contentLength));
                 }
             }
-
+               
+            
+            
+            
             public void uploadSucceeded(SucceededEvent event) {
                 image.setVisible(true);
                 image.setCaption("Uploaded Image " + filename +
