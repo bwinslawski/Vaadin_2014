@@ -77,6 +77,7 @@ public class MyVaadinUI extends UI
     });
         
         button.addClickListener(new Button.ClickListener() {
+            @Override
             public void buttonClick(ClickEvent event) {
                 layout.addComponent(new Label("Thank you for clicking"));
             }
@@ -116,11 +117,22 @@ public class MyVaadinUI extends UI
         ui.getSession().setAttribute("myValue", value);
         // Save to HttpSession
         VaadinService.getCurrentRequest().getWrappedSession().setAttribute("myValue", value);
-
+        getPage().setLocation(getPage().getLocation());
             Label ok = new Label("Jestes zalogowany "+pass+ " " + log);
             layout.addComponent(ok);
         }
-        else
+        else if("PASS1".equals(pass) && "PASS1".equals(log)){
+                  ui.value = "2";
+        // Save to VaadinServiceSession
+        ui.getSession().setAttribute("myValue", value);
+        // Save to HttpSession
+        VaadinService.getCurrentRequest().getWrappedSession().setAttribute("myValue", value);
+       getPage().setLocation(getPage().getLocation());
+        Label ok = new Label("Jestes zalogowany do form  "+pass+ " " + log );
+            layout.addComponent(ok);
+        }
+        
+        else 
         {
             Label ok = new Label("Złe hasło lub login  "+pass+ " " + log); 
              layout.addComponent(ok);
