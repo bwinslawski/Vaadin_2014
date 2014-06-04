@@ -1,0 +1,1 @@
+$wnd.com_mycompany_mavenproject1_AppWidgetSet.runAsyncCallback1('P9(974,1,vwd);_.nc=function p0b(){LQb((!GQb&&(GQb=new MQb),GQb),this.b.e)};fkd(Xh)(1);\n//# sourceURL=com.mycompany.mavenproject1.AppWidgetSet-1.js\n')

@@ -1426,6 +1426,11 @@ body .mytheme.v-app .v-app-loading {
 	box-sizing: border-box;
 	width: 100%;
 	height: 100%;
+        background-color: gray;
+}
+.mytheme{
+    
+    background-color: gray;
 }
 
 .mytheme .v-slot, .mytheme .v-spacing {
@@ -4037,7 +4042,11 @@ body .mytheme.v-app .v-app-loading {
 	background-position: right top;
 	background-image: url(../reindeer/button/img/right.png);/** sprite-ref: buttons; sprite-alignment: right */
 }
-
+.button:hover
+{
+    background-color: gray;
+    
+}
 .mytheme .v-button-caption {
 	color: #222;
 	text-shadow: #fff 0 1px 0;

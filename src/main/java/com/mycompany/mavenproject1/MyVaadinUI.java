@@ -57,12 +57,13 @@ import org.json.simple.parser.ParseException;
 public class MyVaadinUI extends UI
 {
 
-   public ArrayList<Person>  dbb = new ArrayList<Person>();
-   private Table table = new Table("List_Person");
-  
-   int id=0;
-   private HorizontalLayout hl = new HorizontalLayout();
-    
+    public ArrayList<Person>  dbb = new ArrayList<Person>();
+    private Table table = new Table("Lista Filmów");
+    final TextField nazwap = new TextField("Nazwa");
+    final TextField urlp = new TextField("Url zdjecia");
+    int id=0;
+    private HorizontalLayout hl = new HorizontalLayout();
+   final TextField searchName = new TextField("Szukaj nazwe");
     public static String value = "0";
     @WebServlet(value = "/*", asyncSupported = true)
     @VaadinServletConfiguration(productionMode = false, ui = MyVaadinUI.class, widgetset = "com.mycompany.mavenproject1.AppWidgetSet")
@@ -72,12 +73,11 @@ public class MyVaadinUI extends UI
     @Override
     protected void init(VaadinRequest request) {
         
-        final TextField searchName = new TextField("Szukaj nazwe");
+        
         final VerticalLayout layout = new VerticalLayout();
         final VerticalLayout login = new VerticalLayout();
          final VerticalLayout addper = new VerticalLayout();
-         final TextField nazwap = new TextField("Nazwa");
-        final TextField urlp = new TextField("Url zdjecia");
+         
         
         setContent(hl);
        
@@ -113,8 +113,8 @@ public class MyVaadinUI extends UI
         }
         //Jeżeli nie jesteś zalogowany 
         else{
-            final TextField email = new TextField("Email address");
-            final PasswordField password = new PasswordField("PayMate password");
+            final TextField email = new TextField("Email");
+            final PasswordField password = new PasswordField("Hasło");
             
            
             login.addComponent(email); 
@@ -150,35 +150,48 @@ public class MyVaadinUI extends UI
         password.setTextChangeEventMode(AbstractTextField.TextChangeEventMode.EAGER);
         email.setImmediate(true);
         password.setImmediate(true);
-        
+        nazwap.addValidator(new StringLengthValidator("minimum 6 znaków", 6, Integer.MIN_VALUE, false));
+        urlp.addValidator(new StringLengthValidator("minimum 6 znaków", 6, Integer.MIN_VALUE, false));
+
         }
         
-        layout.addComponent(new Button("Reload page", new Button.ClickListener() 
-        {
-            @Override
-            public void buttonClick(ClickEvent event) {
-            getPage().setLocation(getPage().getLocation());
-            }
-        }));
+        
         
         addper.addComponent(new Button("Dodaj film", new Button.ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
-                addPerson();
+                //addPerson();
+                Person   newPerson = new Person(id++,nazwap.getValue(),urlp.getValue(),"elo","11-500");
+                dbb.add(newPerson);
                 showPerson(layout);
                
             }
         }));
          
-        
+       
          layout.addComponent(new Button("Szukaj Film", new Button.ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
-                addPerson();
-                showPerson(layout);
+               // addPerson();
+               showPerson(layout);
                
             }
         }));
+         
+         
+         
+          
+         
+        Property.ValueChangeListener szukaj = new Property.ValueChangeListener() {
+            
+            @Override
+            public void valueChange(Property.ValueChangeEvent event) {
+             showPerson(layout);   
+            } 
+          };
+        searchName.addValueChangeListener(szukaj);
+        searchName.setTextChangeEventMode(AbstractTextField.TextChangeEventMode.EAGER);
+        searchName.setImmediate(true);
         layout.setWidth("70%");
         login.setWidth("10%");
         hl.setWidth("100%");
@@ -197,17 +210,35 @@ public class MyVaadinUI extends UI
     
     public void showPerson(VerticalLayout layout){
         {
-            table.removeAllItems();
+            String szuk = searchName.getValue();
+            int ile = szuk.length();
+           table.removeAllItems();
             layout.removeComponent(table);
-		table.addContainerProperty("  name ", String.class, null);
-		table.addContainerProperty("  url  ", Link.class, null);
+		table.addContainerProperty("name", String.class, null);
+		table.addContainerProperty("url", Link.class, null);
+                //table.addContainerProperty("ileeeee", String.class, null);
 		//table.addContainerProperty("action", Button.class, null);
 		for (final Person p : dbb){
+                    if(ile==0){
 			Item item = table.addItem(p.getId());
+			item.getItemProperty("name").setValue(p.getName());
+                       // item.getItemProperty("ileeeee").setValue(ile+" : "+ szuk);
+			Link lk = new Link("", new ExternalResource(p.getLink()));
+			lk.setIcon(new ExternalResource(p.getLink()));
+			item.getItemProperty("url").setValue(lk);
+                    }
+                    else
+                    {
+                        String foo = p.getName().substring(0, Math.min(ile, p.getName().length()));
+                        if(foo.equals(szuk))
+                        {
+                        Item item = table.addItem(p.getId());
 			item.getItemProperty("name").setValue(p.getName());
 			Link lk = new Link("", new ExternalResource(p.getLink()));
 			lk.setIcon(new ExternalResource(p.getLink()));
 			item.getItemProperty("url").setValue(lk);
+                        }
+                    }
 		}
 
 		layout.addComponent(table);
@@ -216,110 +247,11 @@ public class MyVaadinUI extends UI
         
     }
     public void addPerson(){
-        Person   newPerson = new Person(id++,"bartek","Winsławski","elo","11-500");
+        Person   newPerson = new Person(id++,"lol","www.jacie.pl","elo","11-500");
 	dbb.add(newPerson);
 	//Person_list.broadcast(newPerson);
     }
     
-    
-      public void  FORM(VerticalLayout layout) {
-        final TextField imie = new TextField("Imię:");
-        final TextField email = new TextField("E-mail:");
-        final PasswordField haslo = new PasswordField("Hasło:");
-        final TextField kod = new TextField();
-        final TextField miasto = new TextField();
-        
-        final Button wyslij = new Button("Wyślij");
-
-        Property.ValueChangeListener checkForm = new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                if(imie.isValid() && email.isValid() && haslo.isValid() && kod.isValid()) {
-                    wyslij.setEnabled(true);
-                } else {
-                    wyslij.setEnabled(false);
-                }
-            }
-        };
-
-        Property.ValueChangeListener checkCity = new Property.ValueChangeListener() {
-            @Override
-            public void valueChange(Property.ValueChangeEvent event) {
-                if(kod.isValid()) {
-                    JSONParser parser = new JSONParser();
-                    try {
-                        Object obj = parser.parse(new FileReader("C:/Users/bartek/Documents/NetBeansProjects/vaadin/kody.json"));
-                        JSONObject jsonObject = (JSONObject) obj;
-            
-                        Object city = jsonObject.get(kod.getValue());
-                        if(city == null) {
-                            miasto.setValue("");
-                        } else {
-                            miasto.setValue(city.toString());
-                        }
-                    } catch (FileNotFoundException e) {
-                    } catch (IOException e) {
-                    } catch (ParseException e) {
-                    }
-                } else {
-                    miasto.setValue("");
-                }
-            }
-        };
-        
-        imie.addValueChangeListener(checkForm);
-        email.addValueChangeListener(checkForm);
-        haslo.addValueChangeListener(checkForm);
-        kod.addValueChangeListener(checkForm);
-        kod.addValueChangeListener(checkCity);
-        imie.setTextChangeEventMode(AbstractTextField.TextChangeEventMode.EAGER);
-        email.setTextChangeEventMode(AbstractTextField.TextChangeEventMode.EAGER);
-        haslo.setTextChangeEventMode(AbstractTextField.TextChangeEventMode.EAGER);
-        kod.setTextChangeEventMode(AbstractTextField.TextChangeEventMode.EAGER);
-
-        // walidacja imię
-        imie.addValidator(new RegexpValidator("^[A-Za-zĄĆĘŁŃÓŚŹŻąćęłóńśźż ]+$", "Niepoprawny format"));
-        imie.addValidator(new StringLengthValidator("Nie wystarczająco długi tekst", 3, 100, true));
-        
-        // walidacja e-mail
-        email.addValidator(new EmailValidator("Błędy adres e-mail"));
-        email.addValidator(new StringLengthValidator("Pole wymagane", 1, Integer.MIN_VALUE, false));
-
-        // walidacja hasło
-        haslo.addValidator(new StringLengthValidator("Hasło minimum 10 znaków", 10, Integer.MIN_VALUE, false));
-
-        // walidacja kodu
-        kod.addValidator(new RegexpValidator("^[0-9][0-9]-[0-9][0-9][0-9]$", "Niepoprawny format"));
-        kod.addValidator(new StringLengthValidator("Pole wymagane", 1, Integer.MIN_VALUE, false));
-        
-        // wyświetlamy
-        //final FormLayout layout = new FormLayout();
-        layout.setMargin(true);
-        layout.addStyleName("outlined");
-        //layout.setSizeFull();
-        layout.setSpacing(true);
-       
-
-        imie.setImmediate(true);
-        email.setImmediate(true);
-        haslo.setImmediate(true);
-        
-        layout.addComponent(imie);
-        layout.addComponent(email);
-        layout.addComponent(haslo);
-
-        miasto.setEnabled(false);
-        final HorizontalLayout horizontalLayout = new HorizontalLayout(kod, miasto);
-        horizontalLayout.setCaption("Kod:");
-        horizontalLayout.setSpacing(true);
-        layout.addComponent(horizontalLayout);
-
-        wyslij.setEnabled(false);
-        layout.addComponent(wyslij);
-       
-        }  
-     
-      
       public void logout(MyVaadinUI ui) {
           ui.value = "0";
         // Save to VaadinServiceSession
